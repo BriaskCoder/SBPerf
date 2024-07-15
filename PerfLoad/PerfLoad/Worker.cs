@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,27 +28,27 @@ namespace WorkerService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
             //while (!stoppingToken.IsCancellationRequested)
             //{
-            Thread thread1 = new Thread(SendMessages);
-            Thread thread2 = new Thread(SendMessages);
-            Thread thread3 = new Thread(SendMessages);
-            Thread thread4 = new Thread(SendMessages);
 
-            thread1.Start(1);
-            thread2.Start(2);
-            thread3.Start(3);
-            thread4.Start(4);
+            // Create an array of threads
 
-            Thread thread11 = new Thread(SendMessages);
-            Thread thread21 = new Thread(SendMessages);
-            Thread thread31 = new Thread(SendMessages);
-            Thread thread41 = new Thread(SendMessages);
+            int nThreads = 12;
+            Thread[] threads = new Thread[nThreads];
+            PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
 
-            thread11.Start(11);
-            thread21.Start(21);
-            thread31.Start(31);
-            thread41.Start(41);
+            for (int i = 0; i < nThreads; i++)
+            {
+                threads[i] = new Thread(SendMessages);
+
+                perfThreadInfo[i] = new PerfThreadInfo() { Id = i + 1, NumberMessages = 10000};
+            }
+
+            for (int i = 0; i < nThreads; i++)
+            {
+                threads[i].Start(perfThreadInfo[i]);
+            }
 
             // By default only Warning of above is captured.
             // However the following Info level will be captured by ApplicationInsights,
@@ -61,7 +62,7 @@ namespace WorkerService
                 //}
 
                 // number of messages to be sent to the queue
-                const int numOfMessages = 1000;
+                const int numOfMessages = 10;
 
                 // The Service Bus client types are safe to cache and use as a singleton for the lifetime
                 // of the application, which is best practice when messages are being published or read
@@ -104,11 +105,13 @@ namespace WorkerService
             //}
         }
 
-        static void SendMessages(Object stateInfo)
+        static void SendMessages(object threadInfo)
         {
-            int index = (int)stateInfo;
+            PerfThreadInfo perfThreadInfo = (PerfThreadInfo)threadInfo;
 
-            int numOfMessages = 1000;
+            int index = (int)perfThreadInfo.Id;
+
+            int numOfMessages = perfThreadInfo.NumberMessages;
             var connectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=";
 
             ServiceBusClient client = new ServiceBusClient(connectionString);
@@ -116,8 +119,13 @@ namespace WorkerService
             var queueOrTopicName = "brwstestqueue1";
 
             var queueSender = client.CreateSender(queueOrTopicName);
-            Console.WriteLine($"Sending messages to the queue: {queueOrTopicName} : Thread {index}");
 
+            Stopwatch sw = new Stopwatch();
+            
+
+            string now = DateTime.Now.ToString();
+            Console.WriteLine($"STARTED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now}");
+            sw.Start();
             try
             {
                 for (int i = 0; i < numOfMessages; i++)
@@ -134,7 +142,13 @@ namespace WorkerService
                 client.DisposeAsync();
             }
 
-            Console.WriteLine($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index}");
+            sw.Stop();
+            decimal seconds = sw.ElapsedMilliseconds * 1000;
+            decimal ratePerSecond = numOfMessages / seconds;
+
+            now = DateTime.Now.ToString();
+
+            Console.WriteLine($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}");
         }
     }
 }
