@@ -1,7 +1,6 @@
 ﻿using Azure.Core;
 using Azure.Messaging.ServiceBus;
 using System.Diagnostics;
-using Azure.Messaging.ServiceBus;
 using System;
 using System.Threading.Tasks;
 

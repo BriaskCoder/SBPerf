@@ -28,13 +28,13 @@ namespace WorkerService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
             //while (!stoppingToken.IsCancellationRequested)
             //{
 
             // Create an array of threads
 
-            int nThreads = 12;
+            int nThreads = 4;
             Thread[] threads = new Thread[nThreads];
             PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
 
@@ -42,7 +42,8 @@ namespace WorkerService
             {
                 threads[i] = new Thread(SendMessages);
 
-                perfThreadInfo[i] = new PerfThreadInfo() { Id = i + 1, NumberMessages = 10000};
+                perfThreadInfo[i] = new PerfThreadInfo() { Id = i + 1, NumberMessages = 100};
+                perfThreadInfo[i].logger = _logger;
             }
 
             for (int i = 0; i < nThreads; i++)
@@ -53,7 +54,7 @@ namespace WorkerService
             // By default only Warning of above is captured.
             // However the following Info level will be captured by ApplicationInsights,
             // as appsettings.json configured Information level for the category 'WorkerServiceSampleWithApplicationInsights.Worker'
-            _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
+            _logger.LogInformation("Worker Threads running at: {time}", DateTimeOffset.Now);
 
                 //using (tc.StartOperation<RequestTelemetry>("workeroperation"))
                 //{
@@ -107,9 +108,15 @@ namespace WorkerService
 
         static void SendMessages(object threadInfo)
         {
+
             PerfThreadInfo perfThreadInfo = (PerfThreadInfo)threadInfo;
 
             int index = (int)perfThreadInfo.Id;
+
+            ILogger myLogger = perfThreadInfo.logger;
+
+            myLogger.LogInformation("Thread started");
+
 
             int numOfMessages = perfThreadInfo.NumberMessages;
             var connectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=";
@@ -121,10 +128,10 @@ namespace WorkerService
             var queueSender = client.CreateSender(queueOrTopicName);
 
             Stopwatch sw = new Stopwatch();
-            
-
+           
             string now = DateTime.Now.ToString();
-            Console.WriteLine($"STARTED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now}");
+            myLogger.LogInformation($"STARTED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now}");
+
             sw.Start();
             try
             {
@@ -148,7 +155,7 @@ namespace WorkerService
 
             now = DateTime.Now.ToString();
 
-            Console.WriteLine($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}");
+            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}");
         }
     }
 }
