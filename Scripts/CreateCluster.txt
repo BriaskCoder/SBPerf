@@ -1,0 +1,24 @@
+az aks create --resource-group MSC --name myAKSCluster --node-count 2 --generate-ssh-keys --attach-acr brwscr
+
+SSH key files 'C:\Users\Brian\.ssh\id_rsa' and 'C:\Users\Brian\.ssh\id_rsa.pub' have been generated under ~/.ssh to allow SSH access to the VM. 
+If using machines without permanent storage like Azure Cloud Shell without an attached file share, back up your keys to a safe location
+
+//connect to your Kubernetes cluster
+az aks get-credentials --resource-group MSC --name myAKSCluster
+
+//Get your login server address
+az acr list --resource-group MSC --query "[].{acrLoginServer:loginServer}" --output table
+
+//AKS deployment manifest
+kubectl apply -f .\mydeployment.yaml
+
+//list pods
+kubectl get pods
+
+kubectl delete -f .\mydeployment.yaml
+
+Standard_DS2_v2
+
+az acr login -n brwscr
+docker tag myimage brwscr.azurecr.io/myimage
+docker push brwscr.azurecr.io/myimage
