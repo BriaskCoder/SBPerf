@@ -42,7 +42,7 @@ namespace WorkerService
             {
                 threads[i] = new Thread(SendMessages);
 
-                perfThreadInfo[i] = new PerfThreadInfo() { Id = i + 1, NumberMessages = 100};
+                perfThreadInfo[i] = new PerfThreadInfo() { Id = i + 1, NumberMessages = 1000};
                 perfThreadInfo[i].logger = _logger;
             }
 
