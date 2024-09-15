@@ -36,7 +36,7 @@ namespace PerfConsume
 
             // create a processor that we can use to process the messages
             // TODO: Replace the <QUEUE-NAME> placeholder
-            processor = client.CreateProcessor("brwstestqueue1", new ServiceBusProcessorOptions());
+            processor = client.CreateProcessor("brwstestqueue1", new ServiceBusProcessorOptions() {  } );
 
             try
             {

@@ -34,7 +34,7 @@ namespace WorkerService
 
             // Create an array of threads
 
-            int nThreads = 4;
+            int nThreads = 8;
             Thread[] threads = new Thread[nThreads];
             PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
 
@@ -108,7 +108,6 @@ namespace WorkerService
 
         static void SendMessages(object threadInfo)
         {
-
             PerfThreadInfo perfThreadInfo = (PerfThreadInfo)threadInfo;
 
             int index = (int)perfThreadInfo.Id;
@@ -150,12 +149,12 @@ namespace WorkerService
             }
 
             sw.Stop();
-            decimal seconds = sw.ElapsedMilliseconds * 1000;
+            decimal seconds = sw.ElapsedMilliseconds / 1000;
             decimal ratePerSecond = numOfMessages / seconds;
 
             now = DateTime.Now.ToString();
 
-            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}");
+            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond} Seconds:{seconds} Total: {numOfMessages}::");
         }
     }
 }

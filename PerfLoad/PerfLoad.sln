@@ -5,7 +5,9 @@ VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfLoad", "PerfLoad\PerfLoad.csproj", "{F9BD0C78-94FC-4569-8E91-4EBF68B46F10}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerfConsume", "..\PerfConsume\PerfConsume.csproj", "{FBF39F9C-20B7-4140-AD88-4D006AEDF2B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfConsume", "..\PerfConsume\PerfConsume.csproj", "{FBF39F9C-20B7-4140-AD88-4D006AEDF2B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProjectScripts", "..\ProjectScripts\ProjectScripts.csproj", "{7308A04D-D846-405B-BA42-3154C57F0735}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{FBF39F9C-20B7-4140-AD88-4D006AEDF2B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBF39F9C-20B7-4140-AD88-4D006AEDF2B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBF39F9C-20B7-4140-AD88-4D006AEDF2B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7308A04D-D846-405B-BA42-3154C57F0735}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7308A04D-D846-405B-BA42-3154C57F0735}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7308A04D-D846-405B-BA42-3154C57F0735}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7308A04D-D846-405B-BA42-3154C57F0735}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
