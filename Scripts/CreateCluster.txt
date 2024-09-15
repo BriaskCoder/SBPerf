@@ -1,3 +1,9 @@
+##Service Bus Create
+az deployment group create --resource-group MSC --template-file ServiceBusCreate.bicep
+
+#namespace must be unique
+##Service Bus Create
+
 az aks create --resource-group MSC --name myAKSCluster --node-count 2 --generate-ssh-keys --attach-acr brwscr
 
 SSH key files 'C:\Users\Brian\.ssh\id_rsa' and 'C:\Users\Brian\.ssh\id_rsa.pub' have been generated under ~/.ssh to allow SSH access to the VM. 
