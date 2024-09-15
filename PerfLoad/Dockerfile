@@ -10,8 +10,8 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["PerfLoad/PerfLoad.csproj", "PerfLoad/"]
-RUN dotnet restore "./PerfLoad/PerfLoad.csproj"
+COPY ["PerfLoad.csproj", "."]
+RUN dotnet restore "./PerfLoad.csproj"
 COPY . .
 WORKDIR "/src/PerfLoad"
 RUN dotnet build "./PerfLoad.csproj" -c $BUILD_CONFIGURATION -o /app/build

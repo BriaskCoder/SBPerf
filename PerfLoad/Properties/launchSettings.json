@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "PerfLoad": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
