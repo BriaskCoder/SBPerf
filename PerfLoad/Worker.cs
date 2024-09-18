@@ -116,8 +116,9 @@ namespace WorkerService
 
             myLogger.LogInformation("Thread started");
 
-
             int numOfMessages = perfThreadInfo.NumberMessages;
+            int numConcurrentCalls = perfThreadInfo.NumberConcurrentCalls;
+
             var connectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=";
 
             ServiceBusClient client = new ServiceBusClient(connectionString);
@@ -131,16 +132,35 @@ namespace WorkerService
             string now = DateTime.Now.ToString();
             myLogger.LogInformation($"STARTED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now}");
 
+            var semaphore = new SemaphoreSlim(10);
+
+            var tasks = new List<Task>();
+            // synchronous call to threads.
+            //https://learn.microsoft.com/en-us/dotnet/api/system.threading.manualresetevent?view=net-8.0
             sw.Start();
             try
             {
-                for (int i = 0; i < numOfMessages; i++)
-                {
-                    queueSender.SendMessageAsync(new ServiceBusMessage($"This is a single message that we sent {i}")).Wait();
+                for (int i = 0; i < numOfMessages / numConcurrentCalls; i++)
+                {  
+                    for (int j = 0; j < numConcurrentCalls; j++)
+                    {
+                        int id = i * numConcurrentCalls + j;
+                        semaphore.WaitAsync();
+                        tasks.Add(
+                            queueSender.SendMessageAsync(new ServiceBusMessage($"This is a single message that we sent {id}"))
+                                                                .ContinueWith((t) => semaphore.Release()));
+                    }
+
+                    Task.WhenAll(tasks);
                 }
+            }
+            catch (ServiceBusException ex)
+            {
+                myLogger.LogError($"ServiceBusException: {ex.Message}");
             }
             catch (Exception ex)
             {
+                myLogger.LogError($"Exception: {ex.Message}");
             }
             finally
             {
