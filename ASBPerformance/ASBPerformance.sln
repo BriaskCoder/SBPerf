@@ -3,11 +3,28 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35303.130
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProjectScripts", "..\ProjectScripts\ProjectScripts.csproj", "{75F51A4B-13DF-40EB-97AD-631F93991274}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfConsume", "..\PerfConsume\PerfConsume.csproj", "{E16FA8A6-CDBD-4147-9FE1-A4E6DE379097}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfLoad", "..\PerfLoad\PerfLoad.csproj", "{4FC11CF6-67B7-40D4-8E61-F3AE592DF50B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Scripts", "Scripts", "{60C61625-3B82-43E1-BEA1-A03A435B48D5}"
+	ProjectSection(SolutionItems) = preProject
+		..\ProjectScripts\Adjectives.txt = ..\ProjectScripts\Adjectives.txt
+		..\ProjectScripts\Create ServiceBusExample.bicep = ..\ProjectScripts\Create ServiceBusExample.bicep
+		..\ProjectScripts\CreateAksCluster.bicep = ..\ProjectScripts\CreateAksCluster.bicep
+		..\ProjectScripts\CreateCluster.txt = ..\ProjectScripts\CreateCluster.txt
+		..\ProjectScripts\CreateServiceBusExample.bicep = ..\ProjectScripts\CreateServiceBusExample.bicep
+		..\ProjectScripts\mydeployment.yaml = ..\ProjectScripts\mydeployment.yaml
+		..\ProjectScripts\ServiceBusCreate.bicep = ..\ProjectScripts\ServiceBusCreate.bicep
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SSH Keys", "SSH Keys", "{A6682D47-A886-472D-9705-39D8E40F04EE}"
+	ProjectSection(SolutionItems) = preProject
+		..\ProjectScripts\SSH keys\id_rsa = ..\ProjectScripts\SSH keys\id_rsa
+		..\ProjectScripts\SSH keys\id_rsa.pub = ..\ProjectScripts\SSH keys\id_rsa.pub
+		..\ProjectScripts\SSH keys\sshkey = ..\ProjectScripts\SSH keys\sshkey
+		..\ProjectScripts\SSH keys\sshkey.pub = ..\ProjectScripts\SSH keys\sshkey.pub
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +32,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{75F51A4B-13DF-40EB-97AD-631F93991274}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75F51A4B-13DF-40EB-97AD-631F93991274}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75F51A4B-13DF-40EB-97AD-631F93991274}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75F51A4B-13DF-40EB-97AD-631F93991274}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E16FA8A6-CDBD-4147-9FE1-A4E6DE379097}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E16FA8A6-CDBD-4147-9FE1-A4E6DE379097}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E16FA8A6-CDBD-4147-9FE1-A4E6DE379097}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -30,6 +43,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A6682D47-A886-472D-9705-39D8E40F04EE} = {60C61625-3B82-43E1-BEA1-A03A435B48D5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A72ECD34-00E4-422C-943A-7C9CE725A2DA}
