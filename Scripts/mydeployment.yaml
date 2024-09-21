@@ -13,5 +13,5 @@ spec:
         app: my-app
     spec:
       containers:
-      - name: myimage
-        image: brwscr.azurecr.io/myimage:latest
+      - name: myimage2
+        image: brwscr.azurecr.io/myimage2:latest
