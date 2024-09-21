@@ -44,8 +44,8 @@ namespace WorkerService
                 perfThreadInfo[i] = new PerfThreadInfo() 
                 { 
                     Id = i + 1,
-                    MinimumDuration = 10,
-                    NumberMessages = 100, 
+                    MinimumDuration = 30,
+                    NumberMessages = 10000, 
                     Size = MsgSize.KB1, 
                     ASB_ConnectionString = "Endpoint=sb://briask-msc-sb-run1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Z8BjpFxcAczu/Pw6dE4YdXacgv8Ixs621+ASbA92Xzw=",
                     QueueName = "queue1"

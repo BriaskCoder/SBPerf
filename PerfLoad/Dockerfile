@@ -13,7 +13,7 @@ WORKDIR /src
 COPY ["PerfLoad.csproj", "."]
 RUN dotnet restore "./PerfLoad.csproj"
 COPY . .
-WORKDIR "/src/PerfLoad"
+WORKDIR "/src/."
 RUN dotnet build "./PerfLoad.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
