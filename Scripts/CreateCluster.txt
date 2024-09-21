@@ -1,19 +1,29 @@
 ##Service Bus Create
+az login
 az deployment group create --resource-group MSC --template-file ServiceBusCreate.bicep
+# Unique Namespace name value must be between 6 and 50 characters long.
+# namespace can contain only letters, numbers, and hyphens. 
+# The namespace must start with a letter, and it must end with a letter or number.
+# Powershell must be directory for script file
+# Connection string in resource - Shared Access policies
 
-#namespace must be unique
+#Get ConnectionString from Azure Service Bus
+az servicebus namespace authorization-rule keys list --resource-group MSC --namespace-name briask-MSC-SB-Run1 --name RootManageSharedAccessKey --query primaryConnectionString -o tsv
 ##Service Bus Create
 
-az aks create --resource-group MSC --name myAKSCluster --node-count 2 --generate-ssh-keys --attach-acr brwscr
+##AKS Create
+az login
+az aks create --resource-group MSC --name myAKSCluster --node-count 1 --generate-ssh-keys --attach-acr brwscr
+##AKS Create
 
 SSH key files 'C:\Users\Brian\.ssh\id_rsa' and 'C:\Users\Brian\.ssh\id_rsa.pub' have been generated under ~/.ssh to allow SSH access to the VM. 
 If using machines without permanent storage like Azure Cloud Shell without an attached file share, back up your keys to a safe location
 
-//connect to your Kubernetes cluster
+####//connect to your Kubernetes cluster#####
 az aks get-credentials --resource-group MSC --name myAKSCluster
-az aks get-credentials --resource-group myAKS_rg --name aks_MSC_cluster
+#az aks get-credentials --resource-group myAKS_rg --name aks_MSC_cluster
 
-//Get your login server address
+//Get login server address
 az acr list --resource-group MSC --query "[].{acrLoginServer:loginServer}" --output table
 
 #login to docker?? start docker desktop also?

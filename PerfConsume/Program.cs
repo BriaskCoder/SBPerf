@@ -32,11 +32,13 @@ namespace PerfConsume
             {
                 TransportType = ServiceBusTransportType.AmqpWebSockets
             };
-            client = new ServiceBusClient("Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=", clientOptions);
 
-            // create a processor that we can use to process the messages
-            // TODO: Replace the <QUEUE-NAME> placeholder
-            processor = client.CreateProcessor("brwstestqueue1", new ServiceBusProcessorOptions() {  } );
+            //client = new ServiceBusClient("Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=", clientOptions);
+            client = new ServiceBusClient("Endpoint=sb://briask-msc-sb-run1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Z8BjpFxcAczu/Pw6dE4YdXacgv8Ixs621+ASbA92Xzw=");
+
+            // create a processor that we can use to process the messages            
+            //processor = client.CreateProcessor("brwstestqueue1", new ServiceBusProcessorOptions() {  } );
+            processor = client.CreateProcessor("queue1", new ServiceBusProcessorOptions() { });
 
             try
             {

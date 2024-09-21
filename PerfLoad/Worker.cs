@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,12 +30,8 @@ namespace WorkerService
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
-            //while (!stoppingToken.IsCancellationRequested)
-            //{
 
-            // Create an array of threads
-
-            int nThreads = 8;
+            int nThreads = 12;
             Thread[] threads = new Thread[nThreads];
             PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
 
@@ -42,7 +39,17 @@ namespace WorkerService
             {
                 threads[i] = new Thread(SendMessages);
 
-                perfThreadInfo[i] = new PerfThreadInfo() { Id = i + 1, NumberMessages = 1000};
+                //todo get the connection strings from AKS ConfigMap
+                //https://learn.microsoft.com/en-us/azure/azure-app-configuration/reference-kubernetes-provider?tabs=default#use-connection-string
+                perfThreadInfo[i] = new PerfThreadInfo() 
+                { 
+                    Id = i + 1,
+                    MinimumDuration = 10,
+                    NumberMessages = 100, 
+                    Size = MsgSize.KB1, 
+                    ASB_ConnectionString = "Endpoint=sb://briask-msc-sb-run1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Z8BjpFxcAczu/Pw6dE4YdXacgv8Ixs621+ASbA92Xzw=",
+                    QueueName = "queue1"
+                };
                 perfThreadInfo[i].logger = _logger;
             }
 
@@ -55,55 +62,6 @@ namespace WorkerService
             // However the following Info level will be captured by ApplicationInsights,
             // as appsettings.json configured Information level for the category 'WorkerServiceSampleWithApplicationInsights.Worker'
             _logger.LogInformation("Worker Threads running at: {time}", DateTimeOffset.Now);
-
-                //using (tc.StartOperation<RequestTelemetry>("workeroperation"))
-                //{
-                //    var res = httpClient.GetAsync("https://bing.com").Result.StatusCode;
-                //    _logger.LogInformation("bing http call completed with status:" + res);
-                //}
-
-                // number of messages to be sent to the queue
-                const int numOfMessages = 10;
-
-                // The Service Bus client types are safe to cache and use as a singleton for the lifetime
-                // of the application, which is best practice when messages are being published or read
-                // regularly.
-                //
-                // set the transport type to AmqpWebSockets so that the ServiceBusClient uses the port 443. 
-                // If you use the default AmqpTcp, you will need to make sure that the ports 5671 and 5672 are open
-
-                // TODO: Replace the <NAMESPACE-CONNECTION-STRING> and <QUEUE-NAME> placeholders
-
-                //try
-                //{
-                //    var connectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=";
-
-                //    await using (ServiceBusClient client = new ServiceBusClient(connectionString))
-                //    {
-                //        var queueOrTopicName = "brwstestqueue1";
-
-                //        var queueSender = client.CreateSender(queueOrTopicName);
-                //        Console.WriteLine($"Sending messages to the queue: {queueOrTopicName}");
-
-                //        for (int i = 0; i < numOfMessages; i++)
-                //        {
-                //            await queueSender.SendMessageAsync(new ServiceBusMessage($"This is a single message that we sent {i}"));                            
-                //        }
-                //    }
-
-                //    //Console.WriteLine($"Sent {numOfMessages} messages to the queue: {queueOrTopicName}");
-                //    //Console.WriteLine("Press any key to end the application");
-                //    //Console.ReadKey();
-
-                //    await Task.Delay(1000, stoppingToken);
-                //}
-                //catch (Exception ex)
-                //{
-                //    tc.TrackException(ex);
-                //    tc.Flush();
-                //    throw;
-                //}
-            //}
         }
 
         static void SendMessages(object threadInfo)
@@ -111,6 +69,7 @@ namespace WorkerService
             PerfThreadInfo perfThreadInfo = (PerfThreadInfo)threadInfo;
 
             int index = (int)perfThreadInfo.Id;
+            int minDuration = perfThreadInfo.MinimumDuration;
 
             ILogger myLogger = perfThreadInfo.logger;
 
@@ -118,12 +77,11 @@ namespace WorkerService
 
             int numOfMessages = perfThreadInfo.NumberMessages;
             int numConcurrentCalls = perfThreadInfo.NumberConcurrentCalls;
+            var queueOrTopicName = perfThreadInfo.QueueName;
 
-            var connectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=";
+            string msg = GenerateMessage(perfThreadInfo.Size);
 
-            ServiceBusClient client = new ServiceBusClient(connectionString);
-
-            var queueOrTopicName = "brwstestqueue1";
+            ServiceBusClient client = new ServiceBusClient(perfThreadInfo.ASB_ConnectionString);
 
             var queueSender = client.CreateSender(queueOrTopicName);
 
@@ -137,30 +95,41 @@ namespace WorkerService
             var tasks = new List<Task>();
             // synchronous call to threads.
             //https://learn.microsoft.com/en-us/dotnet/api/system.threading.manualresetevent?view=net-8.0
+
+            bool keepRunning = true;
             sw.Start();
             try
             {
-                for (int i = 0; i < numOfMessages / numConcurrentCalls; i++)
-                {  
-                    for (int j = 0; j < numConcurrentCalls; j++)
+                do
+                {
+                    for (int i = 0; i < numOfMessages / numConcurrentCalls; i++)
                     {
-                        int id = i * numConcurrentCalls + j;
-                        semaphore.WaitAsync();
-                        tasks.Add(
-                            queueSender.SendMessageAsync(new ServiceBusMessage($"This is a single message that we sent {id}"))
-                                                                .ContinueWith((t) => semaphore.Release()));
-                    }
+                        if ((minDuration > 0) && (sw.ElapsedMilliseconds > (minDuration * 1000)))
+                        {
+                            myLogger.LogInformation($"Thread {index} : Minimum Duration reached. Exiting!");
+                            keepRunning = false;
+                            break;
+                        }
 
-                    Task.WhenAll(tasks);
-                }
+                        for (int j = 0; j < numConcurrentCalls; j++)
+                        {
+                            int id = i * numConcurrentCalls + j;
+                            semaphore.WaitAsync();
+                            tasks.Add(SendMessage(queueSender, myLogger, msg, id)
+                                .ContinueWith((t) => semaphore.Release()));
+                        }
+                        Task.WhenAll(tasks);
+                    }
+                } 
+                while (keepRunning);
             }
             catch (ServiceBusException ex)
             {
-                myLogger.LogError($"ServiceBusException: {ex.Message}");
+                myLogger.LogInformation($"ServiceBusException1: {ex.Message}");
             }
             catch (Exception ex)
             {
-                myLogger.LogError($"Exception: {ex.Message}");
+                myLogger.LogError($"Exception1: {ex.Message}");
             }
             finally
             {
@@ -174,7 +143,39 @@ namespace WorkerService
 
             now = DateTime.Now.ToString();
 
-            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond} Seconds:{seconds} Total: {numOfMessages}::");
+            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}/s Seconds:{seconds} Total: {numOfMessages}::");
+        }
+
+        private static Task SendMessage(ServiceBusSender queueSender, ILogger theLogger, string msg, int id)
+        {
+            try
+            {
+                return queueSender.SendMessageAsync(
+                                                new ServiceBusMessage(id + msg)
+                                                {
+                                                    MessageId = "Perf" + id,
+                                                });
+            }
+            catch(ServiceBusException ex)
+            {
+                theLogger.LogInformation($"ServiceBusException2: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                theLogger.LogError($"Exception2: {ex.Message}");
+            }
+            return Task.CompletedTask;
+        }
+
+        private static string GenerateMessage(MsgSize size)
+        {
+            const string msgText = ":: This is a single message that we sent :: ";
+
+            string characters = new('X', ((int)size - msgText.Length - 7));
+
+            string stringToReturn = msgText + characters;
+
+            return stringToReturn;
         }
     }
 }
