@@ -26,6 +26,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SSH Keys", "SSH Keys", "{A6
 		..\ProjectScripts\SSH keys\sshkey.pub = ..\ProjectScripts\SSH keys\sshkey.pub
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResultsService", "..\ResultsService\ResultsService.csproj", "{513E3136-30B7-457C-A83E-87BBEE077F01}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{4FC11CF6-67B7-40D4-8E61-F3AE592DF50B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FC11CF6-67B7-40D4-8E61-F3AE592DF50B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FC11CF6-67B7-40D4-8E61-F3AE592DF50B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{513E3136-30B7-457C-A83E-87BBEE077F01}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{513E3136-30B7-457C-A83E-87BBEE077F01}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{513E3136-30B7-457C-A83E-87BBEE077F01}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{513E3136-30B7-457C-A83E-87BBEE077F01}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
