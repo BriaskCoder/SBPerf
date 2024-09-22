@@ -37,11 +37,11 @@ namespace WorkerService
             Thread[] threads = new Thread[nThreads];
             PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
 
-            httpClient.BaseAddress = new Uri("https://resultsservice.azurewebsites.net/");
-            var response = await httpClient.GetAsync("api/Results/newrun");
+            //httpClient.BaseAddress = new Uri("https://resultsservice.azurewebsites.net/");
+            //var response = await httpClient.GetAsync("api/Results/newrun");
 
-            var result = response.Content.ReadAsStringAsync().Result;
-            var runDetails = JsonSerializer.Deserialize<Run>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            //var result = response.Content.ReadAsStringAsync().Result;
+            //var runDetails = JsonSerializer.Deserialize<Run>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             for (int i = 0; i < nThreads; i++)
             {
@@ -53,7 +53,7 @@ namespace WorkerService
                 { 
                     Id = i + 1,
                     MinimumDuration = 30,
-                    NumberMessages = 10000, 
+                    NumberMessages = 100, 
                     Size = MsgSize.KB1, 
                     ASB_ConnectionString = "Endpoint=sb://briask-msc-sb-run1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Z8BjpFxcAczu/Pw6dE4YdXacgv8Ixs621+ASbA92Xzw=",
                     QueueName = "queue1"
@@ -72,7 +72,7 @@ namespace WorkerService
             _logger.LogInformation("Worker Threads running at: {time}", DateTimeOffset.Now);
         }
 
-        static void SendMessages(object threadInfo)
+        void SendMessages(object threadInfo)
         {
             PerfThreadInfo perfThreadInfo = (PerfThreadInfo)threadInfo;
 
