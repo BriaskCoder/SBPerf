@@ -22,26 +22,31 @@ namespace ResultsService.Controllers
 
         // GET: api/Results
         [HttpGet]
-        public async Task<ActionResult<int>> GetPerfThreadInfo()
+        public async Task<ActionResult<Run>> GetPerfThreadInfo()
         {
             _context.Runs.Add(new Run() { CreatedAt = DateTime.Now, Name = "Test" });
             await _context.SaveChangesAsync();
 
-            int id = _context.Runs.OrderBy(r => r.Id).LastOrDefault().Id;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            var runDeets = _context.Runs.OrderBy(r => r.Id).LastOrDefault();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            return id;
+            return runDeets;
         }
 
         // GET: api/Results
-        [HttpGet("/newrun")]
-        public async Task<ActionResult<int>> GetNewRunId()
+        [Route("newrun")]
+        [HttpGet]
+        public async Task<ActionResult<Run>> GetNewRunId()
         {
             _context.Runs.Add(new Run() { CreatedAt = DateTime.Now, Name = "Test" });
             await _context.SaveChangesAsync();
 
-            int id = _context.Runs.OrderBy(r => r.Id).LastOrDefault().Id;
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            var runDeets = _context.Runs.OrderBy(r => r.Id).LastOrDefault();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
-            return id;
+            return runDeets;
         }
 
         // GET: api/Results/5

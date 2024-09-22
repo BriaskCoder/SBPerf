@@ -27,5 +27,8 @@ namespace WorkerService
         public string DB_ConnectionString { get; set; }
         public string QueueName { get; set; }
         public string TopicName { get; set; }
+
+        public decimal ActualRate { get; set; }
+        public int ActualNumberMessages { get; set; } = 10;
     }
 }

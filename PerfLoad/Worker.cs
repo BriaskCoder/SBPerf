@@ -10,6 +10,8 @@ using System;
 using System.Diagnostics;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,6 +36,12 @@ namespace WorkerService
             int nThreads = 12;
             Thread[] threads = new Thread[nThreads];
             PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
+
+            httpClient.BaseAddress = new Uri("https://resultsservice.azurewebsites.net/");
+            var response = await httpClient.GetAsync("api/Results/newrun");
+
+            var result = response.Content.ReadAsStringAsync().Result;
+            var runDetails = JsonSerializer.Deserialize<Run>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             for (int i = 0; i < nThreads; i++)
             {
@@ -142,6 +150,7 @@ namespace WorkerService
             decimal ratePerSecond = numOfMessages / seconds;
 
             now = DateTime.Now.ToString();
+            //https://resultsservice.azurewebsites.net/newrun
 
             myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}/s Seconds:{seconds} Total: {numOfMessages}::");
         }
