@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ResultsService;
 
@@ -11,9 +12,11 @@ using ResultsService;
 namespace ResultsService.Migrations
 {
     [DbContext(typeof(ResultsServiceContext))]
-    partial class ResultsServiceContextModelSnapshot : ModelSnapshot
+    [Migration("20240930201012_AddDetails")]
+    partial class AddDetails
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,14 +33,8 @@ namespace ResultsService.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ActualNumberMessages")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("ActualRate")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Elapsed")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<long>("Elapsed")
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("FinishTime")
                         .HasColumnType("datetime2");
@@ -59,6 +56,9 @@ namespace ResultsService.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("RateCreation")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("RunId")

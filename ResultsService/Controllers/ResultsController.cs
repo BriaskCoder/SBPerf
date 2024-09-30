@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,13 +23,29 @@ namespace ResultsService.Controllers
 
         // GET: api/Results
         [HttpGet]
-        public async Task<ActionResult<Run>> GetPerfThreadInfo()
+        public async Task<ActionResult<PerfThreadInfo>> GetPerfThreadInfo()
         {
-            _context.Runs.Add(new Run() { CreatedAt = DateTime.Now, Name = "Test" });
+            _context.PerfThreadInfo.Add(new PerfThreadInfo()
+            {
+                ActualRate = 1,
+                Elapsed = 30,
+                ActualNumberMessages = 40,
+                FinishTime = DateTime.Now,
+                MinimumDuration = 30,
+                NumberConcurrentCalls = 10,
+                NumberMessages = 1000,
+                NumCreated = 999,
+                Rate = 3.333M,
+                Size = MsgSize.KB128,
+                RunId = 666,
+                QueueName = "test",
+                StartTime = DateTime.Now,
+                TopicName = "hello"
+            });
             await _context.SaveChangesAsync();
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            var runDeets = _context.Runs.OrderBy(r => r.Id).LastOrDefault();
+            var runDeets = _context.PerfThreadInfo.OrderBy(r => r.Id).LastOrDefault();
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             return runDeets;
@@ -97,12 +114,22 @@ namespace ResultsService.Controllers
         // POST: api/Results
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<PerfThreadInfo>> PostPerfThreadInfo(PerfThreadInfo perfThreadInfo)
+        public async Task<ActionResult<PerfThreadInfo>> PostPerfThreadInfo([FromBody]string perfThreadInfoDetails)
         {
-            _context.PerfThreadInfo.Add(perfThreadInfo);
-            await _context.SaveChangesAsync();
+            try
+            {
+                var deets = JsonSerializer.Deserialize<PerfThreadInfo>(perfThreadInfoDetails);
+                deets.Id = 0;
 
-            return CreatedAtAction("GetPerfThreadInfo", new { id = perfThreadInfo.Id }, perfThreadInfo);
+                _context.PerfThreadInfo.Add(deets);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetPerfThreadInfo", new { id = deets.Id }, deets);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         // DELETE: api/Results/5
