@@ -128,6 +128,7 @@ namespace WorkerService
                     myLogger.LogInformation($"Thread {index} : Batch {batchNo} ");
                     for (int i = 0; i < numOfMessages / numConcurrentCalls; i++)
                     {
+                        //this is how long I want it to run for min duration
                         if ((minDuration > 0) && (sw.ElapsedMilliseconds > (minDuration * 1000)))
                         {
                             myLogger.LogInformation($"Thread {index} : Minimum Duration reached. Exiting!");
