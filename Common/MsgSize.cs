@@ -1,4 +1,4 @@
-﻿namespace ResultsService
+﻿namespace Common
 {
     public enum MsgSize
     {

@@ -7,9 +7,9 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace WorkerService
+namespace Common
 {
-    internal class PerfThreadInfo
+    public class PerfThreadInfo
     {
         public int Id { get; set; }
         public int RunId { get; set; }

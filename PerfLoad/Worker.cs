@@ -15,6 +15,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using Common;
 
 namespace WorkerService
 {
@@ -38,7 +39,7 @@ namespace WorkerService
         {
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
-            int nThreads = 12;
+            int nThreads = 5;
             Thread[] threads = new Thread[nThreads];
             PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
 
@@ -48,6 +49,8 @@ namespace WorkerService
             {
                 threads[i] = new Thread(SendMessages);
 
+                //threads[i] = await Task.Run(() => SendMessages(perfThreadInfo[i]));
+
                 //todo get the connection strings from AKS ConfigMap
                 //https://learn.microsoft.com/en-us/azure/azure-app-configuration/reference-kubernetes-provider?tabs=default#use-connection-string
                 //Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=
@@ -55,13 +58,16 @@ namespace WorkerService
                 {
                     RunId = runDeets.Id,
                     Id = i + 1,
-                    MinimumDuration = 60,
-                    NumberMessages = 10000,
+                    MinimumDuration = 1,
+                    NumberMessages = 1000,
                     Size = MsgSize.KB1,
                     ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
-                    QueueName = "queue1"
+                    QueueName = "queue1",
+                    NumberConcurrentCalls = 10
                 };
                 perfThreadInfo[i].logger = _logger;
+
+                //threads[i] = new Thread(async () => await SendMessages(perfThreadInfo[i]));
             }
 
             for (int i = 0; i < nThreads; i++)
@@ -75,7 +81,7 @@ namespace WorkerService
             _logger.LogInformation("Worker Threads running at: {time}", DateTimeOffset.Now);
         }
 
-        private static async Task<Run> GetRunDetails()
+        private async Task<Run> GetRunDetails()
         {
             var response = await httpClient.GetAsync("api/Results/newrun");
 
@@ -85,7 +91,7 @@ namespace WorkerService
             return runDetails;
         }
 
-        void SendMessages(object threadInfo)
+        private async void SendMessages(object threadInfo)
         {
             PerfThreadInfo perfThreadInfo = (PerfThreadInfo)threadInfo;
 
@@ -97,6 +103,7 @@ namespace WorkerService
             myLogger.LogInformation("Thread started");
 
             int numOfMessages = perfThreadInfo.NumberMessages;
+            int actualNumOfMessages = 0;
             int numConcurrentCalls = perfThreadInfo.NumberConcurrentCalls;
             var queueOrTopicName = perfThreadInfo.QueueName;
 
@@ -119,6 +126,7 @@ namespace WorkerService
 
             bool keepRunning = true;
             int batchNo = 0;
+            int numMess = 0;
             sw.Start();
             try
             {
@@ -126,27 +134,56 @@ namespace WorkerService
                 {
                     batchNo++;
                     myLogger.LogInformation($"Thread {index} : Batch {batchNo} ");
+
+                    //this is how long I want it to run for min duration
+                    if ((minDuration > 0) && (sw.ElapsedMilliseconds > (minDuration * 1000)))
+                    {
+                        myLogger.LogInformation($"Thread {index} : Minimum Duration reached. Exiting!");
+                        keepRunning = false;
+                        break;
+                    }
+                    else
+                    {
+                        myLogger.LogInformation($"KEEP ON RUNNING!!!");
+                    }
+
                     for (int i = 0; i < numOfMessages / numConcurrentCalls; i++)
                     {
-                        //this is how long I want it to run for min duration
-                        if ((minDuration > 0) && (sw.ElapsedMilliseconds > (minDuration * 1000)))
-                        {
-                            myLogger.LogInformation($"Thread {index} : Minimum Duration reached. Exiting!");
-                            keepRunning = false;
-                            break;
-                        }
-
                         for (int j = 0; j < numConcurrentCalls; j++)
                         {
+                            //myLogger.LogInformation($"task {numMess}");
                             int id = i * numConcurrentCalls + j;
-                            semaphore.WaitAsync();
-                            tasks.Add(SendMessage(queueSender, myLogger, msg, id)
-                                .ContinueWith((t) => semaphore.Release()));
+                            await semaphore.WaitAsync();
+
+                            tasks.Add(Task.Run(async () =>
+                            {
+                                await SendMessage(queueSender, myLogger, msg, id);
+                                semaphore.Release();
+                                Interlocked.Increment(ref numMess);
+                            }));
                         }
-                        Task.WhenAll(tasks);
+
+                        var t = Task.WhenAll(tasks);
+                        try
+                        {
+                            await t;
+                        }
+                        catch 
+                        {
+                        }
+
+                        if (t.IsCompleted && t.Status == TaskStatus.RanToCompletion)
+                        {
+                            actualNumOfMessages++;
+                            myLogger.LogInformation($"task completed Batch {batchNo}  Thread {index} :: i {i} :: numMess {numMess} ");
+                        }
+                        else
+                        {
+                            myLogger.LogError($"task failed Batch {batchNo}  Thread {index}");
+                        }
                     }
-                    batchNo++;
-                    myLogger.LogInformation($"Thread {index} : BatchRun {keepRunning} ");
+
+                    myLogger.LogInformation($"Thread {index} : BatchRun {keepRunning}");
                 } 
                 while (keepRunning);
             }
@@ -168,6 +205,8 @@ namespace WorkerService
             decimal seconds = sw.ElapsedMilliseconds / 1000;
             decimal ratePerSecond = numOfMessages / seconds;
 
+            decimal actualRatePerSecond = numMess / seconds;
+
             now = DateTime.Now.ToString();
 
             perfThreadInfo.FinishTime = DateTime.Now;
@@ -182,7 +221,9 @@ namespace WorkerService
             var result = response.Result.Content.ReadAsStringAsync().Result;
             var runDetails = JsonSerializer.Deserialize<Run>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}/s Seconds:{seconds} Total: {numOfMessages}::");
+            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}/s Seconds:{seconds} Total: {numOfMessages}:: {numMess} @@ {actualRatePerSecond}");
+
+            return;
         }
 
         private static Task SendMessage(ServiceBusSender queueSender, ILogger theLogger, string msg, int id)
@@ -198,12 +239,13 @@ namespace WorkerService
             catch(ServiceBusException ex)
             {
                 theLogger.LogInformation($"ServiceBusException2: {ex.Message}");
+                throw;
             }
             catch (Exception ex)
             {
                 theLogger.LogError($"Exception2: {ex.Message}");
+                throw;
             }
-            return Task.CompletedTask;
         }
 
         private static string GenerateMessage(MsgSize size)
