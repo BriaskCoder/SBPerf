@@ -30,8 +30,8 @@ namespace WorkerService
             _logger = logger;
             this.tc = tc;
 
-            //httpClient.BaseAddress = new Uri("https://resultsservice.azurewebsites.net/");
-            httpClient.BaseAddress = new Uri("https://localhost:7000/");
+            httpClient.BaseAddress = new Uri("https://resultsservice.azurewebsites.net/");
+            //httpClient.BaseAddress = new Uri("https://localhost:7000/");
         
         }
 
@@ -40,6 +40,9 @@ namespace WorkerService
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
             int nThreads = 5;
+            int totalMessages = 10000;
+            int messagesPerThread = totalMessages / nThreads;
+
             Thread[] threads = new Thread[nThreads];
             PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
 
@@ -59,10 +62,11 @@ namespace WorkerService
                     RunId = runDeets.Id,
                     Id = i + 1,
                     MinimumDuration = 1,
-                    NumberMessages = 1000,
+                    NumberMessages = messagesPerThread,
                     Size = MsgSize.KB1,
                     ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
-                    QueueName = "queue1",
+                    //QueueName = "queue1",
+                    QueueName = "test",
                     NumberConcurrentCalls = 10
                 };
                 perfThreadInfo[i].logger = _logger;
@@ -221,7 +225,7 @@ namespace WorkerService
             var result = response.Result.Content.ReadAsStringAsync().Result;
             var runDetails = JsonSerializer.Deserialize<Run>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now} : Rate :{ratePerSecond}/s Seconds:{seconds} Total: {numOfMessages}:: {numMess} @@ {actualRatePerSecond}");
+            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : {sw.ElapsedMilliseconds} Thread {index} :Time {now} : Rate :{ratePerSecond}/s Seconds:{seconds} Total: {numOfMessages}:: {numMess} @@ {actualRatePerSecond}");
 
             return;
         }

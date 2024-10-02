@@ -67,6 +67,26 @@ namespace ResultsService.Controllers
             return runDeets;
         }
 
+        // GET: api/Results
+        [Route("currentrun")]
+        [HttpGet]
+        public async Task<ActionResult<int>> GetRunId()
+        {
+            try
+            {
+                var runId = (from r in _context.Runs
+                             orderby r.Id descending
+                             select r.Id).Take(1).Single();
+
+                return runId;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            } 
+        }
+
         // GET: api/Results/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PerfThreadInfo>> GetPerfThreadInfo(int id)
