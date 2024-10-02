@@ -70,15 +70,15 @@ namespace ResultsService.Controllers
         // GET: api/Results
         [Route("currentrun")]
         [HttpGet]
-        public async Task<ActionResult<int>> GetRunId()
+        public async Task<ActionResult<Run>> GetRunId()
         {
             try
             {
-                var runId = (from r in _context.Runs
+                var run = (from r in _context.Runs
                              orderby r.Id descending
-                             select r.Id).Take(1).Single();
+                             select r).Take(1).Single();
 
-                return runId;
+                return run;
             }
             catch (Exception ex)
             {

@@ -87,7 +87,8 @@ namespace WorkerService
 
         private async Task<Run> GetRunDetails()
         {
-            var response = await httpClient.GetAsync("api/Results/newrun");
+            //var response = await httpClient.GetAsync("api/Results/newrun");
+            var response = await httpClient.GetAsync("api/Results/currentrun");
 
             var result = response.Content.ReadAsStringAsync().Result;
             var runDetails = JsonSerializer.Deserialize<Run>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
