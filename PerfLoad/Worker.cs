@@ -218,6 +218,8 @@ namespace WorkerService
             perfThreadInfo.ActualRate = ratePerSecond;
             perfThreadInfo.Elapsed = seconds;
             perfThreadInfo.TopicName = queueOrTopicName;
+            perfThreadInfo.NumCreated = numMess;
+            perfThreadInfo.ActualNumberMessages = numMess;
 
             var resultJson = JsonSerializer.Serialize(perfThreadInfo);
 
