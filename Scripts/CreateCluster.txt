@@ -89,3 +89,12 @@ az group create myAKS_rg
 az deployment group create --resource-group myAKS_rg --template-file CreateAksCluster.bicep --parameters dnsPrefix=myAKSCluster linuxAdminUsername=brws sshRSAPublicKey='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDsEXMVZguNhNr9B7VWdd2PIY07iexQoh8P+249ijVFU5sdDQbYGm1YyJ4sFc4nCUtjggk+T0Yyim0j1TI2YUY5t2+8S+tXn7xDEuiWp33qFpS3Ozc5n52WQlwDLHjit6oAp7gxzib6A1eiADHuawc+HhwCRVXpnY5KeUtpGeffeY3Kwu8fh87L8EsvCyZPt9TuDSP7m/3NMW4aCTh66dEgvLTTWHeJkuhzidj3DpSEB+vi47aVmybsYKUzv8obKwDS86+Fe2KdRGJIgTnihXWitWyVU8nWHF6DHLsrto4DZF4IchRxopoF8uN/DYFexAPFaIVCF5za8H6UVXHVWArbRPIKCbFAJWd9b/X7hfS2gTN3nP3jLA3IMNKaxsJubL8ZfqasSaRmFAJ9iWGpx2GaTkF2y3FytMSfkeP+DEM0jdvlHKS/BS4r542QZQ9UbFMRxQ9d10aRRhIc5WaDBS6nkULt9XBEWw1JDHr1JZ387vzMd8wEEFqV08fjGXMJlGmEaX2EHVoo9fkDVhiHC2xMOocedzEGM7UoRAVoSBRNw8IkkOC6rfkeLGFwiUiXG5jyBFpQcb6OYiUAyVV5cnekExJtanlIfM5TD5c9peUWMTFaPIvzf/O/qrkG4ipwif1Yw8m4qcFwPIbLP7mlP7aFH0uerb9jt2n37bv55hU1Xw== brian@Flyer'
 
 az aks check-acr --resource-group myAKS_rg --name aks_MSC_cluster --acr brwscr.azurecr.io
+
+# new location
+docker build -t producer -f producer-docker .
+docker tag producer brwscr.azurecr.io/producer
+docker push brwscr.azurecr.io/producer
+kubectl apply -f .\Scripts\deploy_producer.yaml
+
+#previous pwershell commands 
+cat (Get-PSReadlineOption).HistorySavePath

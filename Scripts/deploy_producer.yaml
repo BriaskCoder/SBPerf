@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-producer-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-producer
+  template:
+    metadata:
+      labels:
+        app: my-producer
+    spec:
+      containers:
+      - name: producer
+        image: brwscr.azurecr.io/producer:latest
