@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.11.35303.130
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfConsume", "..\PerfConsume\PerfConsume.csproj", "{E16FA8A6-CDBD-4147-9FE1-A4E6DE379097}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C8286F82-DFD2-4FE4-B338-633096EBA883} = {C8286F82-DFD2-4FE4-B338-633096EBA883}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PerfLoad", "..\PerfLoad\PerfLoad.csproj", "{4FC11CF6-67B7-40D4-8E61-F3AE592DF50B}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -30,6 +33,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SSH Keys", "SSH Keys", "{A6
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResultsService", "..\ResultsService\ResultsService.csproj", "{513E3136-30B7-457C-A83E-87BBEE077F01}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C8286F82-DFD2-4FE4-B338-633096EBA883} = {C8286F82-DFD2-4FE4-B338-633096EBA883}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\Common\Common.csproj", "{C8286F82-DFD2-4FE4-B338-633096EBA883}"
 EndProject
