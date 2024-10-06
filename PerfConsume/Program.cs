@@ -38,7 +38,9 @@ namespace PerfConsume
 
             // create a processor that we can use to process the messages            
             //processor = client.CreateProcessor("brwstestqueue1", new ServiceBusProcessorOptions() {  } );
-            processor = client.CreateProcessor("queue1", new ServiceBusProcessorOptions() { });
+            //processor = client.CreateProcessor("queue1", new ServiceBusProcessorOptions() { });
+            //q-duplicatedetecton
+            processor = client.CreateProcessor("q-duplicatedetecton", new ServiceBusProcessorOptions() { });
 
             try
             {

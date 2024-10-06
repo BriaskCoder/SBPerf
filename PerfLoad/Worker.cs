@@ -39,7 +39,7 @@ namespace WorkerService
         {
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
-            int nThreads = 5;
+            int nThreads = 1;
             int totalMessages = 10000;
             int messagesPerThread = totalMessages / nThreads;
 
@@ -65,8 +65,8 @@ namespace WorkerService
                     NumberMessages = messagesPerThread,
                     Size = MsgSize.KB1,
                     ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
-                    //QueueName = "queue1",
-                    QueueName = "test",
+                    QueueName = "q-duplicatedetecton",
+                    //QueueName = "test",
                     NumberConcurrentCalls = 10
                 };
                 perfThreadInfo[i].logger = _logger;
@@ -168,16 +168,22 @@ namespace WorkerService
                             }));
                         }
 
-                        var t = Task.WhenAll(tasks);
+                        var allTasks = Task.WhenAll(tasks);
                         try
                         {
-                            await t;
+                            await allTasks;
                         }
-                        catch 
+                        catch(Exception ex)
                         {
+                            AggregateException exception = allTasks.Exception;
+                            foreach (var error in exception.InnerExceptions)
+                            {
+                                Console.WriteLine(error);
+                            }
+                            Console.WriteLine(ex);
                         }
 
-                        if (t.IsCompleted && t.Status == TaskStatus.RanToCompletion)
+                        if (allTasks.IsCompleted && allTasks.Status == TaskStatus.RanToCompletion)
                         {
                             actualNumOfMessages++;
                             myLogger.LogInformation($"task completed Batch {batchNo}  Thread {index} :: i {i} :: numMess {numMess} ");
@@ -257,9 +263,10 @@ namespace WorkerService
 
         private static string GenerateMessage(MsgSize size)
         {
+            // Also remove 6kb (6000) from the size to account for the message overhead
             const string msgText = ":: This is a single message that we sent :: ";
 
-            string characters = new('X', ((int)size - msgText.Length - 7));
+            string characters = new('X', ((int)size - msgText.Length - 7 - 6000));
 
             string stringToReturn = msgText + characters;
 
