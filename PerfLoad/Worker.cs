@@ -65,7 +65,8 @@ namespace WorkerService
                     NumberMessages = messagesPerThread,
                     Size = MsgSize.KB1,
                     ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
-                    QueueName = "q-duplicatedetecton",
+                    QueueName = "q-default",
+                    //QueueName = "q-duplicatedetecton",
                     //QueueName = "test",
                     NumberConcurrentCalls = 10
                 };
@@ -263,10 +264,16 @@ namespace WorkerService
 
         private static string GenerateMessage(MsgSize size)
         {
+            int headerSize = 0;
+            if (size > MsgSize.KB128)
+            {
+                headerSize = 6000;
+            }
+
             // Also remove 6kb (6000) from the size to account for the message overhead
             const string msgText = ":: This is a single message that we sent :: ";
 
-            string characters = new('X', ((int)size - msgText.Length - 7 - 6000));
+            string characters = new('X', ((int)size - msgText.Length - 7 - headerSize));
 
             string stringToReturn = msgText + characters;
 
