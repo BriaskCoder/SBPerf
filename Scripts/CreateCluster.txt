@@ -94,7 +94,9 @@ az aks check-acr --resource-group myAKS_rg --name aks_MSC_cluster --acr brwscr.a
 docker build -t producer -f producer-docker .
 docker tag producer brwscr.azurecr.io/producer
 docker push brwscr.azurecr.io/producer
+Invoke-RestMethod -URI https://resultsservice.azurewebsites.net/api/Results/newrun
 kubectl apply -f .\Scripts\deploy_producer.yaml
+kubectl delete -f .\Scripts\deploy_producer.yaml
 
 #previous pwershell commands 
 cat (Get-PSReadlineOption).HistorySavePath

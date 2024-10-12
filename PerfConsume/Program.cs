@@ -40,7 +40,7 @@ namespace PerfConsume
             //processor = client.CreateProcessor("brwstestqueue1", new ServiceBusProcessorOptions() {  } );
             //processor = client.CreateProcessor("queue1", new ServiceBusProcessorOptions() { });
             //q-duplicatedetecton
-            processor = client.CreateProcessor("q-duplicatedetecton", new ServiceBusProcessorOptions() { });
+            processor = client.CreateProcessor("q-default", new ServiceBusProcessorOptions() { });
 
             try
             {
@@ -53,8 +53,12 @@ namespace PerfConsume
                 // start processing 
                 await processor.StartProcessingAsync();
 
+                while(true)
+                {
+                    Thread.Sleep(10);
+                }
+
                 Console.WriteLine("Wait for a minute and then press any key to end the processing");
-                Console.ReadKey();
 
                 // stop processing 
                 Console.WriteLine("\nStopping the receiver...");

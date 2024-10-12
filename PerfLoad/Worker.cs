@@ -39,8 +39,8 @@ namespace WorkerService
         {
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
-            int nThreads = 1;
-            int totalMessages = 10000;
+            int nThreads = 4;
+            int totalMessages = 20000;
             int messagesPerThread = totalMessages / nThreads;
 
             Thread[] threads = new Thread[nThreads];
@@ -63,9 +63,11 @@ namespace WorkerService
                     Id = i + 1,
                     MinimumDuration = 1,
                     NumberMessages = messagesPerThread,
-                    Size = MsgSize.KB1,
-                    ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
+                    Size = MsgSize.KB128,
+                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=EWZ3lFP41cDJN1TvfcyOrlJM2k2v8a81k+ASbNxF7/s=",
+                    //ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
                     QueueName = "q-default",
+                    //QueueName = "q-partitioning-on",
                     //QueueName = "q-duplicatedetecton",
                     //QueueName = "test",
                     NumberConcurrentCalls = 10
@@ -180,7 +182,9 @@ namespace WorkerService
                             foreach (var error in exception.InnerExceptions)
                             {
                                 Console.WriteLine(error);
+                                myLogger.LogError(ex, " : Failed??");
                             }
+
                             Console.WriteLine(ex);
                         }
 
@@ -191,7 +195,29 @@ namespace WorkerService
                         }
                         else
                         {
-                            myLogger.LogError($"task failed Batch {batchNo}  Thread {index}");
+                            bool sleepRequired = false;
+                            allTasks.Exception.Handle(ex =>
+                            {
+                                if (ex is ServiceBusException)
+                                {
+                                    myLogger.LogError(ex, $"ServiceBusException : {ex.Message}");
+                                    sleepRequired = true;
+                                }
+                                else
+                                {
+                                    myLogger.LogError(ex, " : Aggregate Failed??");
+                                }
+
+                                return true;
+                            });
+
+                            if (sleepRequired)
+                            {
+                                myLogger.LogInformation($"Sleeping for 10 seconds");
+                                Thread.Sleep(10000);
+                            }
+
+                            myLogger.LogError($"Task failed Batch {batchNo}  Thread {index}");
                         }
                     }
 

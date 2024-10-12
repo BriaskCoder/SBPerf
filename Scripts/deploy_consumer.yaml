@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app-deployment
+  name: my-consumer-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: my-app
+      app: my-consumer
   template:
     metadata:
       labels:
-        app: my-app
+        app: my-consumer
     spec:
       containers:
-      - name: myimage2
-        image: brwscr.azurecr.io/myimage2:latest
+      - name: consumer
+        image: brwscr.azurecr.io/consumer:latest
