@@ -1,6 +1,6 @@
 ##Service Bus Create
 az login
-az deployment group create --resource-group MSC --template-file ServiceBusCreate.bicep
+az deployment group create --resource-group MSC --template-file PremiumServiceBusCreate.bicep
 # Unique Namespace name value must be between 6 and 50 characters long.
 # namespace can contain only letters, numbers, and hyphens. 
 # The namespace must start with a letter, and it must end with a letter or number.
@@ -91,6 +91,13 @@ az deployment group create --resource-group myAKS_rg --template-file CreateAksCl
 az aks check-acr --resource-group myAKS_rg --name aks_MSC_cluster --acr brwscr.azurecr.io
 
 # new location
+az login
+az aks create --resource-group MSC --name myAKSCluster --node-count 1 --generate-ssh-keys --attach-acr brwscr
+az aks get-credentials --resource-group MSC --name myAKSCluster
+#Docker must be started
+az acr login -n brwscr
+# cd to project directory
+az deployment group create --resource-group MSC --template-file ./scripts/StandardServiceBusCreate.bicep
 docker build -t producer -f producer-docker .
 docker tag producer brwscr.azurecr.io/producer
 docker push brwscr.azurecr.io/producer

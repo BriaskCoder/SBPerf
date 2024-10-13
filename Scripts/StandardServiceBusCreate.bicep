@@ -2,10 +2,10 @@
 param location string = resourceGroup().location
 
 resource serviceBusNamespace 'Microsoft.ServiceBus/namespaces@2023-01-01-preview' = {
-  name: 'brwsPremiumSB'
+  name: 'brwsStandardSB'
   location: location
   sku: {
-    name: 'Premium'
+    name: 'Standard'
   }
   properties: {}
 }
