@@ -65,7 +65,7 @@ namespace WorkerService
                     NumberMessages = messagesPerThread,
                     Size = MsgSize.KB1,
                     //ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=yDvr7Q4VLehdR72MVWoNOzxoclBj8LfsG+ASbOTuJaI=",
-                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=WDtxR2UGATLwLCkJ+LT8u2xH721bfnaqL+ASbA+Dn10=",
+                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=I023yVwM1FV452sKrjaum7Y6FIQEcVaT0+ASbAq+4vA=",
                     //ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
                     QueueName = "q-default",
                     //QueueName = "q-partitioning-on",

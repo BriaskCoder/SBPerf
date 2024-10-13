@@ -28,8 +28,6 @@ namespace Common
         [JsonIgnore]
         [NotMapped]
         public ILogger logger { get; set; }
-        [JsonIgnore]
-        [NotMapped]
         public string ASB_ConnectionString { get; set; }
         [JsonIgnore]
         [NotMapped]
