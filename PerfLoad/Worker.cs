@@ -39,8 +39,8 @@ namespace WorkerService
         {
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
-            int nThreads = 4;
-            int totalMessages = 20000;
+            int nThreads = 1;
+            int totalMessages = 100000;
             int messagesPerThread = totalMessages / nThreads;
 
             Thread[] threads = new Thread[nThreads];
@@ -64,12 +64,12 @@ namespace WorkerService
                     MinimumDuration = 1,
                     NumberMessages = messagesPerThread,
                     Size = MsgSize.KB1,
-                    //ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=yDvr7Q4VLehdR72MVWoNOzxoclBj8LfsG+ASbOTuJaI=",
-                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=I023yVwM1FV452sKrjaum7Y6FIQEcVaT0+ASbAq+4vA=",
+                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ozw8DHL8/EWIQWKsTurMeDmkHbsOyX6tv+ASbJWqrH4=",
+                    //ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=mDJCdnQR3TOWbvjY2FUz3opUP7Zr2aoav+ASbK/83HI=",
                     //ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
                     QueueName = "q-default",
                     //QueueName = "q-partitioning-on",
-                    //QueueName = "q-duplicatedetecton",
+                    //QueueName = "q-duplicatedetection-on",
                     //QueueName = "test",
                     NumberConcurrentCalls = 10
                 };
@@ -166,7 +166,7 @@ namespace WorkerService
 
                             tasks.Add(Task.Run(async () =>
                             {
-                                await SendMessage(queueSender, myLogger, msg, id);
+                                await SendMessage(queueSender, myLogger, msg, id, index);
                                 semaphore.Release();
                                 Interlocked.Increment(ref numMess);
                             }));
@@ -267,14 +267,14 @@ namespace WorkerService
             return;
         }
 
-        private static Task SendMessage(ServiceBusSender queueSender, ILogger theLogger, string msg, int id)
+        private static Task SendMessage(ServiceBusSender queueSender, ILogger theLogger, string msg, int id, int index)
         {
             try
             {
                 return queueSender.SendMessageAsync(
                                                 new ServiceBusMessage(id + msg)
                                                 {
-                                                    MessageId = "Perf" + id,
+                                                    MessageId = "Thread:" +index + ":Perf:" + id,
                                                 });
             }
             catch(ServiceBusException ex)
