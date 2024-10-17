@@ -107,3 +107,4 @@ kubectl delete -f .\Scripts\deploy_producer.yaml
 
 #previous pwershell commands 
 cat (Get-PSReadlineOption).HistorySavePath
+#if issues on Q like host not found check if the image is being updated in the container registry

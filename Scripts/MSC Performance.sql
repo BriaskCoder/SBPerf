@@ -1,4 +1,4 @@
-SELECT top 10 *
+SELECT top 100 *
   FROM [dbo].[PerfThreadInfo]
   order by id desc
 
@@ -12,8 +12,6 @@ as
 select * from lastrun lr 
 where lr.runid = (select top 1 id from Runs order by id desc)
 order by lr.id desc
-
-
 
 select top 1 * 
 from Runs
