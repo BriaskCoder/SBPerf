@@ -52,8 +52,6 @@ namespace WorkerService
             {
                 threads[i] = new Thread(SendMessages);
 
-                //threads[i] = await Task.Run(() => SendMessages(perfThreadInfo[i]));
-
                 //todo get the connection strings from AKS ConfigMap
                 //https://learn.microsoft.com/en-us/azure/azure-app-configuration/reference-kubernetes-provider?tabs=default#use-connection-string
                 //Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=
@@ -63,9 +61,10 @@ namespace WorkerService
                     Id = i + 1,
                     MinimumDuration = 1,
                     NumberMessages = messagesPerThread,
+                    NumberThreads = nThreads,
                     Size = MsgSize.KB1,
                     //ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hvY2LIhJIx3j6vvvRVPIIvsJk3XhcZXCs+ASbINLEUE=",
-                    ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=AnngIkyjWyoLoRHsFzXW8hhH96qoVC8eY+ASbNmmzMA=",
+                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=KdqeKNElwNwP5vZn3gVU2WT+LfY9hwZ9H+ASbKsKk3M=",
                     //ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
                     QueueName = "q-default",
                     //QueueName = "q-partitioning-on",
@@ -74,8 +73,6 @@ namespace WorkerService
                     NumberConcurrentCalls = 10
                 };
                 perfThreadInfo[i].logger = _logger;
-
-                //threads[i] = new Thread(async () => await SendMessages(perfThreadInfo[i]));
             }
 
             for (int i = 0; i < nThreads; i++)

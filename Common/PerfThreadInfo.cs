@@ -15,6 +15,7 @@ namespace Common
         public int RunId { get; set; }
         public int NumberMessages { get; set; } = 10;
         public int NumberConcurrentCalls { get; set; } = 10;
+        public int NumberThreads { get; set; } = 1;
 
         /// <summary>
         /// Minimum duration in seconds
