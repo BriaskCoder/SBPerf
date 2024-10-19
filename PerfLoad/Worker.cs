@@ -16,6 +16,8 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Common;
+using System.Drawing;
+using System.Security.Policy;
 
 namespace WorkerService
 {
@@ -24,6 +26,9 @@ namespace WorkerService
         private readonly ILogger<Worker> _logger;
         private TelemetryClient tc;
         private static HttpClient httpClient = new HttpClient();
+
+        private Random r = new Random();
+        private List<int> unshuffled = new List<int>();
 
         public Worker(ILogger<Worker> logger, TelemetryClient tc)
         {
@@ -40,8 +45,12 @@ namespace WorkerService
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
             int nThreads = 1;
-            int totalMessages = 100000;
+            int totalMessages = 10000;
             int messagesPerThread = totalMessages / nThreads;
+            int numberConcurrentCalls = 10;
+            bool sessions = true;
+
+            unshuffled = Enumerable.Range(0, numberConcurrentCalls).ToList();
 
             Thread[] threads = new Thread[nThreads];
             PerfThreadInfo[] perfThreadInfo = new PerfThreadInfo[nThreads];
@@ -64,13 +73,14 @@ namespace WorkerService
                     NumberThreads = nThreads,
                     Size = MsgSize.KB1,
                     //ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hvY2LIhJIx3j6vvvRVPIIvsJk3XhcZXCs+ASbINLEUE=",
-                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=KdqeKNElwNwP5vZn3gVU2WT+LfY9hwZ9H+ASbKsKk3M=",
+                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=I7ASyPuTDyN6oZZh+dmROY5ArWCw5GDxO+ASbOhD++k=",
                     //ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
-                    QueueName = "q-default",
+                    QueueName = "q-sessions-on",
+                    //QueueName = "q-default",
                     //QueueName = "q-partitioning-on",
                     //QueueName = "q-duplicatedetection-on",
                     //QueueName = "test",
-                    NumberConcurrentCalls = 10
+                    NumberConcurrentCalls = numberConcurrentCalls
                 };
                 perfThreadInfo[i].logger = _logger;
             }
@@ -101,7 +111,7 @@ namespace WorkerService
         {
             PerfThreadInfo perfThreadInfo = (PerfThreadInfo)threadInfo;
 
-            int index = (int)perfThreadInfo.Id;
+            int threadId = (int)perfThreadInfo.Id;
             int minDuration = perfThreadInfo.MinimumDuration;
 
             ILogger myLogger = perfThreadInfo.logger;
@@ -122,7 +132,7 @@ namespace WorkerService
             Stopwatch sw = new Stopwatch();
            
             string now = DateTime.Now.ToString();
-            myLogger.LogInformation($"STARTED!! Sending messages to the queue: {queueOrTopicName} : Thread {index} :Time {now}");
+            myLogger.LogInformation($"STARTED!! Sending messages to the queue: {queueOrTopicName} : Thread {threadId} :Time {now}");
 
             var semaphore = new SemaphoreSlim(10);
 
@@ -139,12 +149,12 @@ namespace WorkerService
                 do
                 {
                     batchNo++;
-                    myLogger.LogInformation($"Thread {index} : Batch {batchNo} ");
+                    myLogger.LogInformation($"Thread {threadId} : Batch {batchNo} ");
 
-                    //this is how long I want it to run for min duration
+                    //this is how long it should run for minimum duration
                     if ((minDuration > 0) && (sw.ElapsedMilliseconds > (minDuration * 1000)))
                     {
-                        myLogger.LogInformation($"Thread {index} : Minimum Duration reached. Exiting!");
+                        myLogger.LogInformation($"Thread {threadId} : Minimum Duration reached. Exiting!");
                         keepRunning = false;
                         break;
                     }
@@ -155,15 +165,42 @@ namespace WorkerService
 
                     for (int i = 0; i < numOfMessages / numConcurrentCalls; i++)
                     {
+                        var customerEventOrder = GenerateRandomOrder(numConcurrentCalls);
+                        int numberOdd = 0;
+                        int numberEven = 0;
+                        var sessionIdOdd = Guid.NewGuid().ToString();
+                        var sessionIdEven = Guid.NewGuid().ToString();                       
+
                         for (int j = 0; j < numConcurrentCalls; j++)
                         {
-                            //myLogger.LogInformation($"task {numMess}");
+                            bool lastMsg = false;
+                            var sessionId = (customerEventOrder[j] % 2) == 0 ? sessionIdEven : sessionIdOdd;
+
+                            bool isEven = int.IsEvenInteger(customerEventOrder[j]);
+
+                            if (isEven)
+                            {
+                                numberEven++;
+                            }
+                            else
+                            {
+                                numberOdd++;
+                            }
+
+                            if ((isEven && numberEven == 5) || (!isEven && numberOdd == 5))
+                            {    
+                                lastMsg = true;
+                                const string msgText = ":: This is the last message that we sent :: ";
+                                Console.WriteLine($"Thread {threadId} : Batch {batchNo} : i {i} : j {j} : Last Message {msgText}  {isEven}::{numberEven} {numberOdd}");
+                            }
+
                             int id = i * numConcurrentCalls + j;
                             await semaphore.WaitAsync();
 
+                            Console.WriteLine($"Thread {threadId} : Batch {batchNo} : i {i} : j {j} : Sending message {id} : {msg} : {sessionId} : {lastMsg}");
                             tasks.Add(Task.Run(async () =>
                             {
-                                await SendMessage(queueSender, myLogger, msg, id, index);
+                                await SendMessage(queueSender, myLogger, msg, id, threadId, sessionId, lastMsg);
                                 semaphore.Release();
                                 Interlocked.Increment(ref numMess);
                             }));
@@ -189,7 +226,7 @@ namespace WorkerService
                         if (allTasks.IsCompleted && allTasks.Status == TaskStatus.RanToCompletion)
                         {
                             actualNumOfMessages++;
-                            myLogger.LogInformation($"task completed Batch {batchNo}  Thread {index} :: i {i} :: numMess {numMess} ");
+                            myLogger.LogInformation($"task completed Batch {batchNo}  Thread {threadId} :: i {i} :: numMess {numMess} ");
                         }
                         else
                         {
@@ -215,11 +252,11 @@ namespace WorkerService
                                 Thread.Sleep(10000);
                             }
 
-                            myLogger.LogError($"Task failed Batch {batchNo}  Thread {index}");
+                            myLogger.LogError($"Task failed Batch {batchNo}  Thread {threadId}");
                         }
                     }
 
-                    myLogger.LogInformation($"Thread {index} : BatchRun {keepRunning}");
+                    myLogger.LogInformation($"Thread {threadId} : BatchRun {keepRunning}");
                 } 
                 while (keepRunning);
             }
@@ -259,20 +296,24 @@ namespace WorkerService
             var result = response.Result.Content.ReadAsStringAsync().Result;
             var runDetails = JsonSerializer.Deserialize<Run>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : {sw.ElapsedMilliseconds} Thread {index} :Time {now} : Rate :{ratePerSecond}/s Seconds:{seconds} Total: {numOfMessages}:: {numMess} @@ {actualRatePerSecond}");
+            myLogger.LogInformation($"FINISHED!! Sending messages to the queue: {queueOrTopicName} : {sw.ElapsedMilliseconds} Thread {threadId} :Time {now} : Rate :{ratePerSecond}/s Seconds:{seconds} Total: {numOfMessages}:: {numMess} @@ {actualRatePerSecond}");
 
             return;
         }
 
-        private static Task SendMessage(ServiceBusSender queueSender, ILogger theLogger, string msg, int id, int index)
+        private static Task SendMessage(ServiceBusSender queueSender, ILogger theLogger, string msg, int id, int index, string sessionId, bool lastMsg)
         {
             try
             {
+                Console.WriteLine($"Thread {index} : Sending message {id} : {msg} : {sessionId} : {lastMsg}");
                 return queueSender.SendMessageAsync(
                                                 new ServiceBusMessage(id + msg)
                                                 {
                                                     MessageId = "Thread:" +index + ":Perf:" + id,
-                                                });
+                                                    SessionId = sessionId, 
+                                                    Subject = lastMsg ? "LastMessage" : "NotLastMessage"
+                                                }
+                                                );
             }
             catch(ServiceBusException ex)
             {
@@ -302,6 +343,30 @@ namespace WorkerService
             string stringToReturn = msgText + characters;
 
             return stringToReturn;
+        }
+
+        /// <summary>
+        /// Fisher-Yates shuffle c# implementation
+        /// modified from https://exceptionnotfound.net/understanding-the-fisher-yates-card-shuffling-algorithm/
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        private List<int> GenerateRandomOrder(int size)
+        {
+            List<int> shuffledNumbers = new List<int>(unshuffled);
+            //Step 1: For each unshuffled item in the collection
+            for (int n = unshuffled.Count - 1; n > 0; --n)
+            {
+                //Step 2: Randomly pick an item which has not been shuffled
+                int k = r.Next(n + 1);
+
+                //Step 3: Swap the selected item with the last "unstruck" letter in the collection
+                int temp = unshuffled[n];
+                unshuffled[n] = unshuffled[k];
+                unshuffled[k] = temp;
+            }
+
+            return shuffledNumbers;
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Common
         public int NumberMessages { get; set; } = 10;
         public int NumberConcurrentCalls { get; set; } = 10;
         public int NumberThreads { get; set; } = 1;
+        public bool Sessions { get; set; }
 
         /// <summary>
         /// Minimum duration in seconds
