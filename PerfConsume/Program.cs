@@ -26,7 +26,7 @@ namespace PerfConsume
                 TransportType = ServiceBusTransportType.AmqpWebSockets
             };
 
-            client = new ServiceBusClient("Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=+BdQRpV5CTFJMnKHKLZSYMjtQtcLt2/S/+ASbDglhK0=", clientOptions);
+            client = new ServiceBusClient("Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=3eyJ9mnOJdH1Nd+zTAZAbpZoKqF+UrHXj+ASbDcjGjY=", clientOptions);
             //client = new ServiceBusClient("Endpoint=sb://briask-msc-sb-run1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Z8BjpFxcAczu/Pw6dE4YdXacgv8Ixs621+ASbA92Xzw=");
 
             // create a processor that we can use to process the messages            
