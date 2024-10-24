@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using Common;
 using System.Drawing;
 using System.Security.Policy;
+using Microsoft.Azure.Amqp.Framing;
 
 namespace WorkerService
 {
@@ -45,11 +46,12 @@ namespace WorkerService
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
             int nThreads = 1;
-            int totalMessages = 10000;
+            int totalMessages = 1000;
+            MsgSize size = MsgSize.KB1;
             int messagesPerThread = totalMessages / nThreads;
             int numberConcurrentCalls = 10;
             bool sessions = true;
-
+            
             unshuffled = Enumerable.Range(0, numberConcurrentCalls).ToList();
 
             Thread[] threads = new Thread[nThreads];
@@ -71,12 +73,12 @@ namespace WorkerService
                     MinimumDuration = 1,
                     NumberMessages = messagesPerThread,
                     NumberThreads = nThreads,
-                    Size = MsgSize.KB1,
+                    Size = size,
                     //ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hvY2LIhJIx3j6vvvRVPIIvsJk3XhcZXCs+ASbINLEUE=",
-                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=I7ASyPuTDyN6oZZh+dmROY5ArWCw5GDxO+ASbOhD++k=",
+                    ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=+BdQRpV5CTFJMnKHKLZSYMjtQtcLt2/S/+ASbDglhK0=",
                     //ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
-                    QueueName = "q-sessions-on",
                     //QueueName = "q-default",
+                    QueueName = "q-sessions-on",
                     //QueueName = "q-partitioning-on",
                     //QueueName = "q-duplicatedetection-on",
                     //QueueName = "test",
@@ -98,10 +100,13 @@ namespace WorkerService
 
         private async Task<Run> GetRunDetails()
         {
-            //var response = await httpClient.GetAsync("api/Results/newrun");
-            var response = await httpClient.GetAsync("api/Results/currentrun");
-
+            //todo tidy this up
+            var response = await httpClient.GetAsync("api/Results/newrun");
             var result = response.Content.ReadAsStringAsync().Result;
+
+            response = await httpClient.GetAsync("api/Results/currentrun");
+
+            result = response.Content.ReadAsStringAsync().Result;
             var runDetails = JsonSerializer.Deserialize<Run>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             return runDetails;
@@ -200,7 +205,7 @@ namespace WorkerService
                             Console.WriteLine($"Thread {threadId} : Batch {batchNo} : i {i} : j {j} : Sending message {id} : {msg} : {sessionId} : {lastMsg}");
                             tasks.Add(Task.Run(async () =>
                             {
-                                await SendMessage(queueSender, myLogger, msg, id, threadId, sessionId, lastMsg);
+                                await SendMessage(queueSender, myLogger, msg, i, isEven, id, threadId, sessionId, lastMsg);
                                 semaphore.Release();
                                 Interlocked.Increment(ref numMess);
                             }));
@@ -301,7 +306,7 @@ namespace WorkerService
             return;
         }
 
-        private static Task SendMessage(ServiceBusSender queueSender, ILogger theLogger, string msg, int id, int index, string sessionId, bool lastMsg)
+        private static Task SendMessage(ServiceBusSender queueSender, ILogger theLogger, string msg, int corrId, bool isEven, int id, int index, string sessionId, bool lastMsg)
         {
             try
             {
@@ -309,7 +314,8 @@ namespace WorkerService
                 return queueSender.SendMessageAsync(
                                                 new ServiceBusMessage(id + msg)
                                                 {
-                                                    MessageId = "Thread:" +index + ":Perf:" + id,
+                                                    MessageId = "Thread:" + index + ":Perf:" + id,
+                                                    CorrelationId = "Message Sequence: " + corrId + " :: " + isEven,
                                                     SessionId = sessionId, 
                                                     Subject = lastMsg ? "LastMessage" : "NotLastMessage"
                                                 }

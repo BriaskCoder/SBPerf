@@ -26,7 +26,7 @@ namespace PerfConsume
                 TransportType = ServiceBusTransportType.AmqpWebSockets
             };
 
-            client = new ServiceBusClient("Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=I7ASyPuTDyN6oZZh+dmROY5ArWCw5GDxO+ASbOhD++k=", clientOptions);
+            client = new ServiceBusClient("Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=+BdQRpV5CTFJMnKHKLZSYMjtQtcLt2/S/+ASbDglhK0=", clientOptions);
             //client = new ServiceBusClient("Endpoint=sb://briask-msc-sb-run1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=Z8BjpFxcAczu/Pw6dE4YdXacgv8Ixs621+ASbA92Xzw=");
 
             // create a processor that we can use to process the messages            
@@ -36,7 +36,7 @@ namespace PerfConsume
 
             if (enableSessions)
             {
-                sessionProcessor = client.CreateSessionProcessor("q-sessions-on", new ServiceBusSessionProcessorOptions() { });
+                sessionProcessor = client.CreateSessionProcessor("q-sessions-on", new ServiceBusSessionProcessorOptions() {  });
 
                 try
                 {
@@ -112,9 +112,11 @@ namespace PerfConsume
         {
             string body = args.Message.Body.ToString();
             string subject = args.Message.Subject;
-            string sessiodId = args.Message.SessionId;
+            string sessiondId = args.Message.SessionId;
+            string id = args.Message.MessageId;
+            var corrrelationId = args.Message.CorrelationId;
 
-            Console.WriteLine($"Received Session Message: {sessiodId} {subject} {body}");
+            Console.WriteLine($"Received Session Message: {id} {corrrelationId} {sessiondId} {subject} {body}");
             if (subject.Contains("Last"))
             {
                 await args.CompleteMessageAsync(args.Message);

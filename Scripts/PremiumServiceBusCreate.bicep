@@ -64,6 +64,24 @@ resource serviceBusQueue2 'Microsoft.ServiceBus/namespaces/queues@2023-01-01-pre
   }
 }
 
+resource serviceBusQueue3 'Microsoft.ServiceBus/namespaces/queues@2023-01-01-preview' = {
+  parent: serviceBusNamespace
+  name: 'q-sessions-on'
+  properties: {
+    lockDuration: 'PT5M'
+    maxSizeInMegabytes: 5120
+    requiresDuplicateDetection: false
+    requiresSession: true
+    defaultMessageTimeToLive: 'PT10M'
+    deadLetteringOnMessageExpiration: false
+    duplicateDetectionHistoryTimeWindow: 'PT10M'
+    maxDeliveryCount: 10
+    autoDeleteOnIdle: 'P10675199DT2H48M5.4775807S'
+    enablePartitioning: false
+    enableExpress: false
+  }
+}
+
 var serviceBusEndpoint = '${serviceBusNamespace.id}/AuthorizationRules/RootManageSharedAccessKey'
 var serviceBusConnectionString = listKeys(serviceBusEndpoint, serviceBusNamespace.apiVersion).primaryConnectionString
 output serviceBusConnectionString string = serviceBusConnectionString

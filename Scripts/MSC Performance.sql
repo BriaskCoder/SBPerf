@@ -1,11 +1,29 @@
-SELECT top 100 *
+SELECT top 300 *
   FROM [dbo].[PerfThreadInfo]
   order by id desc
 
+
+   [Id]
+      ,[NumberMessages]
+      ,[NumberConcurrentCalls]
+      ,[MinimumDuration]
+      ,[Size]
+      ,[Rate]
+      ,[StartTime]
+      ,[FinishTime]
+      ,[Elapsed]
+      ,[QueueName]
+      ,[TopicName]
+      ,[NumCreated]
+      ,[ActualRate]
+      ,[RunId]
+      ,[ActualNumberMessages]
+      ,[ASB_ConnectionString]
+	  	   	   	  	
 with lastrun
 as
 	(
-		SELECT [Id],[NumberMessages],[NumberConcurrentCalls],[MinimumDuration],[Size],[Rate],[StartTime],[FinishTime],[Elapsed],
+		SELECT [Id], [NumberThreads],[Sessions],[NumberMessages],[NumberConcurrentCalls],[MinimumDuration],[Size],[Rate],[StartTime],[FinishTime],[Elapsed],
 		[QueueName],[TopicName],[NumCreated],[ActualRate],[RunId],[ActualNumberMessages],[ASB_ConnectionString]
 		FROM [dbo].[PerfThreadInfo] p
 	)
