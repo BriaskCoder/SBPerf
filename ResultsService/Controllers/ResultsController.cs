@@ -173,5 +173,90 @@ namespace ResultsService.Controllers
         {
             return _context.PerfThreadInfo.Any(e => e.Id == id);
         }
+
+        [Route("availableinstance")]
+        [HttpGet]
+        public async Task<ActionResult<ConsumerInstance>> GetAvailableInstance()
+        {
+            try
+            {
+                using var transaction = _context.Database.BeginTransaction();
+
+                var instance = (from ci in _context.ConsumerInstances
+                                where ci.InUse == false
+                                orderby ci.Id descending
+                           select ci).Take(1).Single();
+                instance.InUse = true;
+                _context.Entry(instance).State = EntityState.Modified;
+
+                await _context.SaveChangesAsync();
+
+                transaction.Commit();
+
+                return instance;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        [Route("releaseinstance/{instance}")]
+        [HttpGet]
+        public async Task<ActionResult<ConsumerInstance>> ReleaseInstance(string instance)
+        {
+            try
+            {
+                using var transaction = _context.Database.BeginTransaction();
+
+                var instanceToRelease = (from ci in _context.ConsumerInstances
+                                where ci.Subscription == instance
+                                select ci).Take(1).Single();
+
+                instanceToRelease.InUse = false;
+                _context.Entry(instanceToRelease).State = EntityState.Modified;
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+
+                return instanceToRelease;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        [Route("releaseinstance/all")]
+        [HttpGet]
+        public async Task<ActionResult<List<ConsumerInstance>>> ReleaseAllInstances()
+        {
+            try
+            {
+                using var transaction = _context.Database.BeginTransaction();
+
+                var instanceToRelease = (from ci in _context.ConsumerInstances
+                                         select ci).ToList();
+
+                foreach (var instance in instanceToRelease)
+                {
+                    instance.InUse = false;
+                    _context.Entry(instance).State = EntityState.Modified;
+                }
+
+                await _context.SaveChangesAsync();
+                transaction.Commit();
+
+                return instanceToRelease;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
     }
 }

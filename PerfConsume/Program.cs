@@ -3,6 +3,9 @@ using Azure.Messaging.ServiceBus;
 using System.Diagnostics;
 using System;
 using System.Threading.Tasks;
+using System.Net.Http;
+using System.Text.Json;
+using Common;
 
 namespace PerfConsume
 {
@@ -10,7 +13,12 @@ namespace PerfConsume
     {
         static async Task Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            //int subscriptionCount = 0;
+            int subscriptionCount = 1;
+            //int subscriptionCount = 5;
+            //int subscriptionCount = 50;
+
+            bool enableSessions = false;
 
             // the client that owns the connection and can be used to create senders and receivers
             ServiceBusClient client;
@@ -19,7 +27,7 @@ namespace PerfConsume
             ServiceBusProcessor processor;
             ServiceBusSessionProcessor sessionProcessor;
 
-            bool enableSessions = true;
+
 
             var clientOptions = new ServiceBusClientOptions()
             {
@@ -71,7 +79,20 @@ namespace PerfConsume
             }
             else
             {
-                processor = client.CreateProcessor("q-default", new ServiceBusProcessorOptions() { });
+                var subscriptionToprocess = "q-default";
+                if (subscriptionCount > 0)
+                {
+                    var httpClient = new HttpClient();
+                    httpClient.BaseAddress = new Uri("https://resultsservice.azurewebsites.net/");
+                    //httpClient.BaseAddress = new Uri("https://localhost:7000/");
+                    var response = await httpClient.GetAsync("api/Results/availableinstance");
+                    var result = response.Content.ReadAsStringAsync().Result;
+                    var instance = JsonSerializer.Deserialize<ConsumerInstance>(result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    subscriptionToprocess = instance.Subscription;
+                    httpClient.Dispose();
+                }
+
+                processor = client.CreateProcessor(subscriptionToprocess, new ServiceBusProcessorOptions() { });
 
                 try
                 {

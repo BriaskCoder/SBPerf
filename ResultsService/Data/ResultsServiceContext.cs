@@ -16,5 +16,6 @@ namespace ResultsService
 
         public DbSet<PerfThreadInfo> PerfThreadInfo { get; set; } = default!;
         public DbSet<Run> Runs { get; set; } = default!;
+        public DbSet<ConsumerInstance> ConsumerInstances { get; set; } = default!;
     }
 }
