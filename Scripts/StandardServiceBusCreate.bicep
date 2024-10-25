@@ -86,7 +86,7 @@ resource serviceBusQueue3 'Microsoft.ServiceBus/namespaces/queues@2023-01-01-pre
   }
 }
 
-resource serviceBusTopicDefault 'Microsoft.ServiceBus/namespaces/topics@2022-10-01-preview' = {
+resource serviceBusTopicDefault 'Microsoft.ServiceBus/namespaces/topics@2023-01-01-preview' = {
   parent: serviceBusNamespace
   name: 't-default'
   properties: {
@@ -95,7 +95,7 @@ resource serviceBusTopicDefault 'Microsoft.ServiceBus/namespaces/topics@2022-10-
   }
 }
 
-resource subscriptionsDefault 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-10-01-preview' = {
+resource subscriptionsDefault 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2023-01-01-preview' = {
   parent: serviceBusTopicDefault
   name: 'subscriptionDefault'
   properties: {
@@ -104,7 +104,7 @@ resource subscriptionsDefault 'Microsoft.ServiceBus/namespaces/topics/subscripti
   }
 }
 
-resource serviceBusTopicSubs1 'Microsoft.ServiceBus/namespaces/topics@2022-10-01-preview' = {
+resource serviceBusTopicSubs1 'Microsoft.ServiceBus/namespaces/topics@2023-01-01-preview' = {
   parent: serviceBusNamespace
   name: 't-subs1'
   properties: {
@@ -113,7 +113,7 @@ resource serviceBusTopicSubs1 'Microsoft.ServiceBus/namespaces/topics@2022-10-01
   }
 }
 
-resource subscriptionsLow 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-10-01-preview' = [for i in range(0, subscriptionCountLow): {
+resource subscriptionsLow 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2023-01-01-preview' = [for i in range(0, subscriptionCountLow): {
   parent: serviceBusTopicSubs1
   name: 'subscription${i+1}'
   properties: {
@@ -122,7 +122,7 @@ resource subscriptionsLow 'Microsoft.ServiceBus/namespaces/topics/subscriptions@
   }
 }]
 
-resource serviceBusTopicSubs5 'Microsoft.ServiceBus/namespaces/topics@2022-10-01-preview' = {
+resource serviceBusTopicSubs5 'Microsoft.ServiceBus/namespaces/topics@2023-01-01-preview' = {
   parent: serviceBusNamespace
   name: 't-subs5'
   properties: {
@@ -131,7 +131,7 @@ resource serviceBusTopicSubs5 'Microsoft.ServiceBus/namespaces/topics@2022-10-01
   }
 }
 
-resource subscriptionsMedium 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-10-01-preview' = [for i in range(0, subscriptionCountMedium): {
+resource subscriptionsMedium 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2023-01-01-preview' = [for i in range(0, subscriptionCountMedium): {
   parent: serviceBusTopicSubs5
   name: 'subscription${i+1}'
   properties: {
@@ -140,7 +140,7 @@ resource subscriptionsMedium 'Microsoft.ServiceBus/namespaces/topics/subscriptio
   }
 }]
 
-resource serviceBusTopicSubs50 'Microsoft.ServiceBus/namespaces/topics@2022-10-01-preview' = {
+resource serviceBusTopicSubs50 'Microsoft.ServiceBus/namespaces/topics@2023-01-01-preview' = {
   parent: serviceBusNamespace
   name: 't-subs50'
   properties: {
@@ -149,7 +149,7 @@ resource serviceBusTopicSubs50 'Microsoft.ServiceBus/namespaces/topics@2022-10-0
   }
 }
 
-resource subscriptionsHigh 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-10-01-preview' = [for i in range(0, subscriptionCountHigh): {
+resource subscriptionsHigh 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2023-01-01-preview' = [for i in range(0, subscriptionCountHigh): {
   parent: serviceBusTopicSubs50
   name: 'subscription${i+1}'
   properties: {
@@ -158,7 +158,7 @@ resource subscriptionsHigh 'Microsoft.ServiceBus/namespaces/topics/subscriptions
   }
 }]
 
-resource serviceBusTopicFilterCorrelation 'Microsoft.ServiceBus/namespaces/topics@2022-10-01-preview' = {
+resource serviceBusTopicFilterCorrelation 'Microsoft.ServiceBus/namespaces/topics@2023-01-01-preview' = {
   parent: serviceBusNamespace
   name: 't-filter-correlation'
   properties: {
@@ -167,7 +167,7 @@ resource serviceBusTopicFilterCorrelation 'Microsoft.ServiceBus/namespaces/topic
   }
 }
 
-resource subscriptionFilterCorrelation 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2022-10-01-preview' = {
+resource subscriptionFilterCorrelation 'Microsoft.ServiceBus/namespaces/topics/subscriptions@2023-01-01-preview' = {
   parent: serviceBusTopicFilterCorrelation
   name: 'subscriptionFilterCorrelation'
   properties: {
@@ -176,7 +176,7 @@ resource subscriptionFilterCorrelation 'Microsoft.ServiceBus/namespaces/topics/s
   }
 }
 
-resource correlationFilterRules 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2021-06-01-preview' = [for code in priorityStrings: {
+resource correlationFilterRules 'Microsoft.ServiceBus/namespaces/topics/subscriptions/rules@2023-01-01-preview' = [for code in priorityStrings: {
   name: 'CorrelationFilter-${code}'
   parent: subscriptionFilterCorrelation
   properties: {
