@@ -45,8 +45,8 @@ namespace WorkerService
         {
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
-            int nThreads = 1;
-            int totalMessages = 10000;
+            int nThreads = 10;
+            int totalMessages = 100000;
             MsgSize size = MsgSize.KB1;
             int messagesPerThread = totalMessages / nThreads;
             int numberConcurrentCalls = 10;
@@ -74,14 +74,14 @@ namespace WorkerService
                     NumberMessages = messagesPerThread,
                     NumberThreads = nThreads,
                     Size = size,
-                    //ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hvY2LIhJIx3j6vvvRVPIIvsJk3XhcZXCs+ASbINLEUE=",
-                    ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=3eyJ9mnOJdH1Nd+zTAZAbpZoKqF+UrHXj+ASbDcjGjY=",
+                    ASB_ConnectionString = "Endpoint=sb://brwspremiumpartitionsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ZytpUcOPntl+wIi3OJaXx8FT5Th2HLMdH+ASbFMLoDE=",
+                    //ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=W02f1T6rUFKAPjb6T0sTmwR4Q9O3Ql1G6+ASbG8MJhY=",
                     //ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
-                    //QueueName = "q-default",
+                    QueueName = "q-default",
                     //QueueName = "q-sessions-on",
                     //QueueName = "q-partitioning-on",
                     //QueueName = "q-duplicatedetection-on",
-                    QueueName = "t-default",
+                    //QueueName = "t-default",
                     //QueueName = "t-subs1",
                     //QueueName = "t-subs5",
                     //QueueName = "t-subs50",
@@ -104,7 +104,6 @@ namespace WorkerService
 
         private async Task<Run> GetRunDetails()
         {
-            //todo tidy this up
             var response = await httpClient.GetAsync("api/Results/newrun");
             var result = response.Content.ReadAsStringAsync().Result;
 
