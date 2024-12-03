@@ -46,8 +46,8 @@ namespace WorkerService
             _logger.LogInformation("Worker starting running at: {time}", DateTimeOffset.Now);
 
             int nThreads = 10;
-            int totalMessages = 100000;
-            MsgSize size = MsgSize.KB1;
+            int totalMessages = 10000;
+            MsgSize size = MsgSize.KB4;
             int messagesPerThread = totalMessages / nThreads;
             int numberConcurrentCalls = 10;
             bool sessions = true;
@@ -74,8 +74,8 @@ namespace WorkerService
                     NumberMessages = messagesPerThread,
                     NumberThreads = nThreads,
                     Size = size,
-                    ASB_ConnectionString = "Endpoint=sb://brwspremiumpartitionsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=ZytpUcOPntl+wIi3OJaXx8FT5Th2HLMdH+ASbFMLoDE=",
-                    //ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=W02f1T6rUFKAPjb6T0sTmwR4Q9O3Ql1G6+ASbG8MJhY=",
+                    ASB_ConnectionString = "Endpoint=sb://brwspremiumsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=i2a5HncFH3XAm6WrC34W5TCQrJ3q1+ME7+ASbM7kt+s=",
+                    //ASB_ConnectionString = "Endpoint=sb://brwsstandardsb.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=1eoDmawl4fzHbfptjMh0TJdQ4LK0N8pCc+ASbHVEJFE=",
                     //ASB_ConnectionString = "Endpoint=sb://brwstestnamespace1.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=hCtK3tapXto2J3S2ix5FGsyxR0/UmbZ5q+ASbPFRfVk=",
                     QueueName = "q-default",
                     //QueueName = "q-sessions-on",
